@@ -1,227 +1,237 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Financial Entry System</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Invoice - SHRI GANESH MOTORS</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 40px;
+      background-color: #f9f9f9;
+      color: #333;
+    }
+    .header, .sub-header {
+      text-align: center;
+    }
+    .header {
+      font-size: 28px;
+      font-weight: bold;
+      color: #444;
+    }
+    .sub-header {
+      font-size: 14px;
+      margin-bottom: 40px;
+    }
+    .section {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .section > div {
+      width: 48%;
+    }
+    .label {
+      font-weight: bold;
+      display: inline-block;
+      width: 120px;
+    }
+    input[type="text"], input[type="number"], input[type="date"] {
+      width: 60%;
+      padding: 5px;
+      margin: 5px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
     }
     table {
-      border-collapse: collapse;
       width: 100%;
-      margin-bottom: 20px;
+      border-collapse: collapse;
+      background: #fff;
     }
     th, td {
       border: 1px solid #ccc;
-      padding: 8px;
+      padding: 10px;
       text-align: center;
     }
     th {
-      background-color: #f2f2f2;
+      background-color: #eee;
     }
-    input[type="text"], input[type="number"], input[type="date"] {
-      width: 100%;
-      padding: 5px;
+    .no-print {
+      margin-top: 20px;
     }
-    .btn {
-      padding: 5px 10px;
-      margin-top: 10px;
+    .no-print button {
+      padding: 8px 15px;
+      margin-right: 10px;
+      background: #007BFF;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
       cursor: pointer;
     }
-    h2 {
-      margin-top: 40px;
+    .no-print button:hover {
+      background: #0056b3;
     }
-    .footer-summary {
-      font-size: 18px;
-      font-weight: bold;
-      background: #e6f7ff;
-      padding: 10px;
-      border: 2px solid #ccc;
-    }
-
     @media print {
-      .btn {
+      .no-print, .no-print-column {
         display: none !important;
       }
+      input {
+        border: none;
+      }
+    }
+    .section-title {
+      text-align: center;
+      font-size: 20px;
+      font-weight: bold;
+      margin: 30px 0 10px;
+    }
+    .total-amount {
+      margin-top: 20px;
+      font-size: 18px;
+      text-align: right;
+      font-weight: bold;
+    }
+    .conditions {
+      font-size: 12px;
+      margin-top: 40px;
+    }
+    .signature {
+      text-align: right;
+      margin-top: 60px;
     }
   </style>
 </head>
 <body>
-  <h1>Financial Data Entry System</h1>
-  <label>Financial Year: <input type="text" id="financialYear" placeholder="2024-2025" /></label>
-  <br/><br/>
 
-  <div id="sections"></div>
+  <div class="header">SHRI GANESH MOTORS</div>
+  <div class="sub-header">Near Bus Stand Bilara Road, Borunda, Jodhpur, Rajasthan 342604 | M. 6376978548</div>
 
-  <button class="btn" onclick="addSection('Jodhpur Tyres Payment', ['Chq No.', 'Date', 'Amount', 'Remark'])">Add Jodhpur Tyres Payment</button>
-  <button class="btn" onclick="addSection('Bike Purchase', ['Sr.', 'Invoice No.', 'Date', 'Amount', 'Stock', 'Remark'])">Add Bike Purchase</button>
-  <button class="btn" onclick="addSection('Parts Purchase', ['Sr.', 'Invoice No.', 'Date', 'Amount', 'Remark'])">Add Parts Purchase</button>
-  <br/><br/>
-  <button class="btn" onclick="saveData()">💾 Save Data</button>
-  <button class="btn" onclick="window.print()">🖨️ Print</button>
-  <button class="btn" onclick="downloadPDF()">⬇️ Download PDF</button>
+  <div class="section">
+    <div>
+      <div><span class="label">Customer Name:</span><input type="text" id="custName"></div>
+      <div><span class="label">Address:</span><input type="text" id="address"></div>
+      <div><span class="label">Mobile No:</span><input type="text" id="mobile"></div>
+      <div><span class="label">Frame No:</span><input type="text" id="frame"></div>
+      <div><span class="label">Register No:</span><input type="text" id="reg"></div>
+      <div><span class="label">Model:</span><input type="text" id="model"></div>
+      <div><span class="label">Service Type:</span><input type="text" id="service"></div>
+    </div>
+    <div>
+      <div><span class="label">Invoice No:</span><input type="text" id="invoice"></div>
+      <div><span class="label">Date:</span><input type="date" id="date"></div>
+    </div>
+  </div>
 
-  <div class="footer-summary" id="finalSummary">🔄 Final Calculation Loading...</div>
+  <div class="section-title">Parts Details</div>
+  <table id="partsTable">
+    <thead>
+      <tr>
+        <th>Part Name</th>
+        <th>Quantity</th>
+        <th>MRP</th>
+        <th>Total</th>
+        <th class="no-print-column">Action</th>
+      </tr>
+    </thead>
+    <tbody id="partsBody"></tbody>
+  </table>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <div class="no-print">
+    <button onclick="addPart()">Add Part</button>
+  </div>
+
+  <div id="labourSection">
+    <div class="section-title">Labour Details</div>
+    <table id="labourTable">
+      <thead>
+        <tr>
+          <th>Labour Name</th>
+          <th>Charges</th>
+          <th class="no-print-column">Action</th>
+        </tr>
+      </thead>
+      <tbody id="labourBody"></tbody>
+    </table>
+  </div>
+
+  <div class="no-print">
+    <button onclick="addLabour()">Add Labour</button>
+    <button onclick="window.print()">Print</button>
+  </div>
+
+  <div class="total-amount">
+    Total Amount: ₹<span id="totalAmount">0.00</span>
+  </div>
+
+  <div class="conditions">
+    <p><strong>Terms & Conditions:</strong> Goods once sold will not be taken back. Warranty as per manufacturer.</p>
+  </div>
+
+  <div class="signature">
+    <p>Authorized Signature</p>
+  </div>
+
   <script>
-    let sectionId = 0;
-    const columnMap = {};
-    const sectionTitleMap = {};
-
-    function addSection(title, columns) {
-      sectionId++;
-      const secId = 'section' + sectionId;
-      columnMap[secId] = columns;
-      sectionTitleMap[secId] = title;
-
-      let html = `<h2>${title}</h2>`;
-      html += `<table id="${secId}">
-        <thead><tr>`;
-      columns.forEach(col => html += `<th>${col}</th>`);
-      html += `<th>Action</th></tr></thead><tbody></tbody>`;
-      html += `<tfoot><tr>`;
-      columns.forEach(col => {
-        if (col === 'Amount' || col === 'Stock') {
-          html += `<td>Total: <span class="total-${col.toLowerCase()}">0</span></td>`;
-        } else {
-          html += `<td></td>`;
-        }
-      });
-      html += `<td></td></tr></tfoot>`;
-      html += `</table>
-      <button class="btn" onclick="addRow('${secId}')">Add Row</button><br/><br/>`;
-
-      document.getElementById('sections').insertAdjacentHTML('beforeend', html);
-      addRow(secId);
+    function addPart() {
+      const tbody = document.getElementById("partsBody");
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td><input type="text" name="partName[]"></td>
+        <td><input type="number" name="qty[]" oninput="calculateTotal()"></td>
+        <td><input type="number" name="mrp[]" step="0.01" oninput="calculateTotal()"></td>
+        <td class="partTotal">0.00</td>
+        <td class="no-print-column"><button onclick="removeRow(this)">Remove</button></td>
+      `;
+      tbody.appendChild(row);
     }
 
-    function addRow(tableId) {
-      const columns = columnMap[tableId];
-      const table = document.getElementById(tableId).getElementsByTagName('tbody')[0];
-      const row = document.createElement('tr');
-      columns.forEach(col => {
-        let inputType = col.toLowerCase().includes('date') ? 'date' :
-                        col.toLowerCase().includes('amount') || col.toLowerCase().includes('stock') ? 'number' : 'text';
-        row.innerHTML += `<td><input type="${inputType}" oninput="updateTotal('${tableId}')" /></td>`;
-      });
-      row.innerHTML += `<td><button class="btn" onclick="this.parentElement.parentElement.remove(); updateTotal('${tableId}')">Remove</button></td>`;
-      table.appendChild(row);
-      updateTotal(tableId);
+    function addLabour() {
+      const tbody = document.getElementById("labourBody");
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td><input type="text" name="labourName[]"></td>
+        <td><input type="number" name="charges[]" step="0.01" oninput="calculateTotal()"></td>
+        <td class="no-print-column"><button onclick="removeRow(this)">Remove</button></td>
+      `;
+      tbody.appendChild(row);
+      updateLabourSectionVisibility();
     }
 
-    function updateTotal(tableId) {
-      const table = document.getElementById(tableId);
-      const headers = Array.from(table.querySelectorAll('thead th'));
-      const amounts = Array.from(table.querySelectorAll('tbody tr')).map(row => {
-        return {
-          amount: parseFloat(row.cells[headers.findIndex(h => h.innerText === 'Amount')]?.querySelector('input')?.value || 0),
-          stock: parseFloat(row.cells[headers.findIndex(h => h.innerText === 'Stock')]?.querySelector('input')?.value || 0)
-        };
+    function removeRow(button) {
+      button.closest("tr").remove();
+      updateLabourSectionVisibility();
+      calculateTotal();
+    }
+
+    function updateLabourSectionVisibility() {
+      const tbody = document.getElementById("labourBody");
+      const section = document.getElementById("labourSection");
+      section.style.display = tbody.children.length > 0 ? 'block' : 'none';
+    }
+
+    function calculateTotal() {
+      let total = 0;
+
+      // Calculate Parts Total
+      document.querySelectorAll("#partsTable tbody tr").forEach(row => {
+        const qty = parseFloat(row.querySelector('[name="qty[]"]').value) || 0;
+        const mrp = parseFloat(row.querySelector('[name="mrp[]"]').value) || 0;
+        const partTotal = qty * mrp;
+        row.querySelector(".partTotal").innerText = partTotal.toFixed(2);
+        total += partTotal;
       });
 
-      const totalAmount = amounts.reduce((sum, r) => sum + r.amount, 0);
-      const totalStock = amounts.reduce((sum, r) => sum + (r.stock || 0), 0);
-
-      if (table.querySelector('tfoot .total-amount'))
-        table.querySelector('tfoot .total-amount').innerText = totalAmount.toFixed(2);
-      if (table.querySelector('tfoot .total-stock'))
-        table.querySelector('tfoot .total-stock').innerText = totalStock;
-
-      updateFinalSummary();
-    }
-
-    function updateFinalSummary() {
-      let tyresTotal = 0, bikeTotal = 0, partsTotal = 0;
-
-      for (let id in sectionTitleMap) {
-        const title = sectionTitleMap[id];
-        const table = document.getElementById(id);
-        const amountCell = table?.querySelector('tfoot .total-amount');
-        const total = parseFloat(amountCell?.innerText || 0);
-        if (title.includes("Tyres")) tyresTotal += total;
-        else if (title.includes("Bike")) bikeTotal += total;
-        else if (title.includes("Parts")) partsTotal += total;
-      }
-
-      const totalPayment = bikeTotal + partsTotal;
-      const diff = tyresTotal - totalPayment;
-      const message = diff >= 0
-        ? `✅ ₹${diff.toFixed(2)} Advance Available`
-        : `❌ ₹${Math.abs(diff).toFixed(2)} Payment Due`;
-
-      document.getElementById('finalSummary').innerText =
-        `Tyres Payment: ₹${tyresTotal.toFixed(2)} | Bike: ₹${bikeTotal.toFixed(2)} | Parts: ₹${partsTotal.toFixed(2)} → ${message}`;
-    }
-
-    function saveData() {
-      const data = {
-        financialYear: document.getElementById('financialYear').value,
-        sections: {}
-      };
-
-      for (let id in columnMap) {
-        const rows = [];
-        const table = document.getElementById(id);
-        const tbody = table.querySelector('tbody');
-        tbody.querySelectorAll('tr').forEach(tr => {
-          const rowData = [];
-          tr.querySelectorAll('td input').forEach(input => {
-            rowData.push(input.value);
-          });
-          rows.push(rowData);
-        });
-        data.sections[id] = {
-          title: sectionTitleMap[id],
-          columns: columnMap[id],
-          rows: rows
-        };
-      }
-
-      localStorage.setItem('financialData', JSON.stringify(data));
-      alert("✅ Data saved successfully!");
-    }
-
-    function downloadPDF() {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-      doc.text("Financial Entry System\nYear: " + document.getElementById('financialYear').value, 10, 10);
-      doc.html(document.body, {
-        callback: function (doc) {
-          doc.save("financial-entry.pdf");
-        },
-        x: 10,
-        y: 20,
-        width: 180
+      // Add Labour Charges
+      document.querySelectorAll('[name="charges[]"]').forEach(input => {
+        total += parseFloat(input.value) || 0;
       });
+
+      document.getElementById("totalAmount").innerText = total.toFixed(2);
     }
 
-    window.onload = function() {
-      const data = JSON.parse(localStorage.getItem('financialData'));
-      if (!data) return;
-      document.getElementById('financialYear').value = data.financialYear;
-
-      for (let id in data.sections) {
-        const section = data.sections[id];
-        addSection(section.title, section.columns);
-        const currentId = 'section' + sectionId;
-        const table = document.getElementById(currentId).querySelector('tbody');
-        table.innerHTML = '';
-        section.rows.forEach(rowData => {
-          const row = document.createElement('tr');
-          section.columns.forEach((col, idx) => {
-            let inputType = col.toLowerCase().includes('date') ? 'date' :
-                            col.toLowerCase().includes('amount') || col.toLowerCase().includes('stock') ? 'number' : 'text';
-            row.innerHTML += `<td><input type="${inputType}" value="${rowData[idx]}" oninput="updateTotal('${currentId}')" /></td>`;
-          });
-          row.innerHTML += `<td><button class="btn" onclick="this.parentElement.parentElement.remove(); updateTotal('${currentId}')">Remove</button></td>`;
-          table.appendChild(row);
-        });
-        updateTotal(currentId);
-      }
-    };
+    window.onload = updateLabourSectionVisibility;
   </script>
+
 </body>
 </html>
